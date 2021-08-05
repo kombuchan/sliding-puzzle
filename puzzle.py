@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 from collections import deque
+import time
 
 MAX_BOARD_SIZE = 500
 
@@ -65,6 +66,38 @@ class Puzzle(tk.Frame):
             self._slide(pieces['left'], pieces['center'],
                         (self.piece_size, 0))
         self.check_status()
+        
+    def slide2(self,condition):
+        self.canvas.update()
+        time.sleep(0.5)
+        pieces = self.move_pieces()
+        if condition == 'Up' and pieces['bottom']:
+            self._slide(pieces['bottom'], pieces['center'], 
+                        (0, -self.piece_size))
+        if condition ==('Down') and pieces['top']:
+            self._slide(pieces['top'], pieces['center'],
+                        (0, self.piece_size))
+        if condition == ('Left') and pieces['right']:
+            self._slide(pieces['right'], pieces['center'],
+                        (-self.piece_size, 0))
+        if condition == ('Right') and pieces['left']:
+            self._slide(pieces['left'], pieces['center'],
+                        (self.piece_size, 0))
+        self.check_status()  
+    
+    def takeSecond(self,element):
+        return element[1]
+
+    def retValues(self):
+        arr = []
+        ret = []
+        for piece in self.board:
+            arr.append((piece['value'],piece['pos_final']))
+        arr.sort(key=self.takeSecond)
+        for piece in arr:
+            ret.append(piece[0])
+        # print(ret)
+        return ret
 
     def _slide(self, from_, to, coord):
         self.canvas.move(from_['id'], *coord)
