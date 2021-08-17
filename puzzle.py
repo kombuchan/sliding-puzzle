@@ -56,16 +56,21 @@ class Puzzle(tk.Frame):
         if event.keysym == ('Up') and pieces['bottom']:
             self._slide(pieces['bottom'], pieces['center'], 
                         (0, -self.piece_size))
+            
         if event.keysym == ('Down') and pieces['top']:
             self._slide(pieces['top'], pieces['center'],
                         (0, self.piece_size))
+            
         if event.keysym == ('Left') and pieces['right']:
             self._slide(pieces['right'], pieces['center'],
                         (-self.piece_size, 0))
+            
         if event.keysym == ('Right') and pieces['left']:
             self._slide(pieces['left'], pieces['center'],
                         (self.piece_size, 0))
+            
         self.check_status()
+        
         
     def slide2(self,condition):
         self.canvas.update()
@@ -74,16 +79,21 @@ class Puzzle(tk.Frame):
         if condition == 'Up' and pieces['bottom']:
             self._slide(pieces['bottom'], pieces['center'], 
                         (0, -self.piece_size))
+            return 1
         if condition ==('Down') and pieces['top']:
             self._slide(pieces['top'], pieces['center'],
                         (0, self.piece_size))
+            return 1
         if condition == ('Left') and pieces['right']:
             self._slide(pieces['right'], pieces['center'],
                         (-self.piece_size, 0))
+            return 1
         if condition == ('Right') and pieces['left']:
             self._slide(pieces['left'], pieces['center'],
                         (self.piece_size, 0))
-        self.check_status()  
+            return 1
+        self.check_status()
+        return 0  
     
     def takeSecond(self,element):
         return element[1]
@@ -96,7 +106,7 @@ class Puzzle(tk.Frame):
         arr.sort(key=self.takeSecond)
         for piece in arr:
             ret.append(piece[0])
-        # print(ret)
+        print(ret)
         return ret
 
     def _slide(self, from_, to, coord):
