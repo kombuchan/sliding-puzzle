@@ -5,25 +5,23 @@ from puzzle import *
 from optparse import OptionParser
 from pynput.keyboard import Key, Controller
 import time
+from queue import PriorityQueue
 
 class Node:
-    def __init__(self,G,H,F,values):
-        self.H = H
-        self.G = G
-        self.F = F
-        self.values = []
-        self.neighbors = []
+    def __init__(self,values,parent,g,h,f,move):
+        self.g = g
+        self.h = h
+        self.f = f
+        self.values = values
+        self.parent = parent
+        self.move = move
        
 
     def __lt__(self,other):
-        return self.F < other.F
+        return self.f < other.f
     
-    def find_H (self):
-        goal = [123456789]
-        count = 0
-        for i in range(len(self.values)): 
-            if not (self.values[i] == goal[i]): count +=1
-        return count
+    def __eq__(self,other):
+        return self.values == other.values
 
 class Solver:
     def __init__(self) :
@@ -34,6 +32,9 @@ class Solver:
         args, _ = parser.parse_args()
         self.puzzle = Puzzle(args.image, 3)
         self.puzzle.master.title('Sliding puzzle')
+        self.move = ""
+        
+
         self.solve()
         # self.slide_pieces()
         self.puzzle.mainloop()
@@ -51,51 +52,57 @@ class Solver:
     def find_neighbors(self):
         keysym = [('Up','Down'),('Down','Up'),('Left','Right'),('Right','Left')]
         neighbors = []
-        
-        
+        h=100
         for move in keysym:
-            if(self.puzzle.slide2(move[0])):
-              neighbors.append(self.ret_values())
-              self.puzzle.slide2(move[1])
+            if(self.puzzle.possible_moves(move[0])):
+              neighbors.append((self.ret_values(),move[0]))
+              self.puzzle.possible_moves(move[1])
             else : continue
         return neighbors
     
-    def solve(self):
-            open, close = [] , []
-            keysym = [('Up','Down'),('Down','Up'),('Left','Right'),('Right','Left')]
-            node_start, node_goal = Node(0,sys.maxsize,sys.maxsize,self.ret_values()), Node(sys.maxsize,0,sys.maxsize,[123456789])
-            node_start.G, node_start.H , node_start.F = 0, node_start.find_H() , node_start.find_H()
-            open.append(node_start)
-            print(f"original : {self.ret_values()} {node_start.H}")
-            node_start.neighbors = self.find_neighbors()
-            print(node_start.neighbors)
-            # while changed to if for debugging
-            # while(open):
-            #     g = 1
-            #     open.sort()
-            #     node_curr = Node()
-            #     node_curr = open.pop(0)
-            #     print(node_curr.values)
-            #     if node_curr.values == node_goal.values : 
-            #         print("Found")
-                    # break
-                # for move in keysym:
-                #     node_neighbor = Node()
-                #     node_neighbor.prev = node_curr
-                #     self.puzzle.slide2(move[0])
-                #     print(self.puzzle.retValues())
-                #     node_neighbor.values = self.puzzle.retValues()
-                #     node_neighbor.G = g
-                #     node_neighbor.H = self.find_H()
-                #     node_neighbor.F = node_neighbor.G + node_neighbor.H
-                #     node_curr.neighbors.append(self.puzzle.retValues())
-                #     if not (node_neighbor in open): open.append(node_neighbor)
-                #     self.puzzle.slide2(move[1])
-                # g+=1
+    def find_H(self,arr):
+        initial = arr
+        goal = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        return sum(abs(b%3 - g%3) + abs(b//3 - g//3)
+            for b, g in ((initial.index(i), goal.index(i)) for i in range(1, 9)))
+    
 
-                # self.puzzle.slide2(keysym[0][0])
-                # self.puzzle.retValues()
-            return 0
+    def solve(self):
+            g = 0
+            h = self.find_H(self.ret_values())
+            f = g + h
+
+            start = Node(self.ret_values(),None,g,h,f,'')
+            goal = Node([1,2,3,4,5,6,7,8,9],None,0,0,0,'')
+            
+            open = []
+            closed = []
+            neighbors = []
+            open.append(start)
+
+            while open:
+                current = open[0]
+                # print(f"current: {current.values} {current.move} ")
+                # print(current.move)
+                self.puzzle.slide2(current.move)
+                if current.values == goal.values : 
+                    print("Found")
+                    break
+                
+                neighbors = self.find_neighbors()
+                
+        
+                for n in neighbors:
+                    node = Node(n[0],None,current.g+1,self.find_H(n[0]),g+1+self.find_H(n[0]),n[1])
+                    # print(f" neighbor {self.find_H(n[0])} {n[1] } ")
+                    
+                    if node in closed : continue
+                    if node in open and current.g < node.g : continue
+                    open.append(node)
+                closed.append(current)
+                del open[0]
+                open.sort()
+        
 
         
     

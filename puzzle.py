@@ -70,30 +70,44 @@ class Puzzle(tk.Frame):
                         (self.piece_size, 0))
             
         self.check_status()
-        
-        
+
+    def possible_moves(self,condition):
+        pieces = self.move_pieces()
+        if condition == 'Up' and pieces['bottom']:
+            self._slide2(pieces['bottom'], pieces['center'], 
+                        (0, -self.piece_size))
+            return 1
+        if condition ==('Down') and pieces['top']:
+            self._slide2(pieces['top'], pieces['center'],
+                        (0, self.piece_size))
+            return 1
+        if condition == ('Left') and pieces['right']:
+            self._slide2(pieces['right'], pieces['center'],
+                        (-self.piece_size, 0))
+            return 1
+        if condition == ('Right') and pieces['left']:
+            self._slide2(pieces['left'], pieces['center'],
+                        (self.piece_size, 0))
+            return 1
+        return 0
+
     def slide2(self,condition):
         self.canvas.update()
-        time.sleep(0.5)
+        time.sleep(0.01)
         pieces = self.move_pieces()
         if condition == 'Up' and pieces['bottom']:
             self._slide(pieces['bottom'], pieces['center'], 
                         (0, -self.piece_size))
-            return 1
         if condition ==('Down') and pieces['top']:
             self._slide(pieces['top'], pieces['center'],
                         (0, self.piece_size))
-            return 1
         if condition == ('Left') and pieces['right']:
             self._slide(pieces['right'], pieces['center'],
                         (-self.piece_size, 0))
-            return 1
         if condition == ('Right') and pieces['left']:
             self._slide(pieces['left'], pieces['center'],
                         (self.piece_size, 0))
-            return 1
         self.check_status()
-        return 0  
     
     def takeSecond(self,element):
         return element[1]
@@ -113,6 +127,10 @@ class Puzzle(tk.Frame):
         self.canvas.move(from_['id'], *coord)
         to['pos_final'], from_['pos_final'] = from_['pos_final'], to['pos_final']
         self.steps += 1
+    
+    def _slide2(self, from_, to, coord):
+        # self.canvas.move(from_['id'], *coord)
+        to['pos_final'], from_['pos_final'] = from_['pos_final'], to['pos_final']
 
     def move_pieces(self):
         curr = {'center': None,
