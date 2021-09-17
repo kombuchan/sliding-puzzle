@@ -95,6 +95,7 @@ class Puzzle(tk.Frame):
         self.canvas.update()
         time.sleep(0.01)
         pieces = self.move_pieces()
+        if condition == '' : print("")
         if condition == 'Up' and pieces['bottom']:
             self._slide(pieces['bottom'], pieces['center'], 
                         (0, -self.piece_size))

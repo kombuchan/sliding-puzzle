@@ -4,11 +4,12 @@ from optparse import OptionParser
 
 
 class Node:
-    def __init__(self,values,parent,g,h,f,move):
+    def __init__(self,values,path,parent,g,h,f,move):
         self.g = g
         self.h = h
         self.f = f
         self.values = values
+        self.path = path
         self.parent = parent
         self.move = move
        
@@ -62,26 +63,29 @@ class Solver:
     
 
     def solve(self):
-            keysym = {'Up':'Down','Down':'Up','Left':'Right','Right':'Left'}
+            keysym = {'Up':'Down','Down':'Up','Left':'Right','Right':'Left','':''}
             
             g = 0
             h = self.find_H(self.ret_values())
             f = g + h
 
-            start = Node(self.ret_values(),None,g,h,f,'')
-            goal = Node([1,2,3,4,5,6,7,8,9],None,0,0,0,'')
+            start = Node(self.ret_values(),None,None,g,h,f,'')
+            goal = Node([1,2,3,4,5,6,7,8,9],None,None,0,0,0,'')
             
             open = []
             closed = []
             neighbors = []
             open.append(start)
-            prev = 1000
-            
+            path = []
+            prev = start
             while open:
                 current = open[0]
                 print(f"current: {current.f} {current.move} ")
                 # print(current.move)
+                # if current != start and current.parent != prev:
+                #     while(prev != current) : self.puzzle.slide2(keysym[path.pop()])
                 self.puzzle.slide2(current.move)
+                path.append(current.move)
                 if current.values == goal.values : 
                     print("Found")
                     break
@@ -90,26 +94,38 @@ class Solver:
                 n_fval = []
         
                 for n in neighbors:
-                    node = Node(n[0],current,current.g+1,self.find_H(n[0]),g+1+self.find_H(n[0]),n[1])
+                    node = Node(n[0],path,current,current.g+1,self.find_H(n[0]),g+1+self.find_H(n[0]),n[1])
                     print(f" neighbor: {node.f} {node.move}")
                     n_fval.append(node)
                     if node in closed : continue
                     if node not in open: open.append(node)
-                    elif node in open:
-                        open_node = open[open.index(node)]
-                        if node.g < open_node.g:
-                            open_node.g = node.g
-                            open_node.f = node.f
-                            # open_node.parent = node.parent
-                            open_node.move = node.move
+                    for n in open:
+                        # open_node = open[open.index(node)]
+                        # if node.g < open_node.g:
+                        #     open_node.g = node.g
+                        #     open_node.f = node.f
+                        #     open_node.path = node.path
+                        #     open_node.move = node.move
+                        if node.f == n.f:
+                             if n.g > node.g:
+                                n.g = node.g
+                                n.f = node.f
+                                n.path = node.path
+                                n.move = node.move
+                                n.parent = node.parent
 
-                if current != start : 
-                    greater = 0
-                    for n in n_fval: 
-                        if len(open) >= 2 and n.f <= open[1].f: greater = 1
-                    if greater == 0 : self.puzzle.slide2(keysym[current.move])
+                # if current != start : 
+                #     greater = 0
+                #     for n in n_fval: 
+                #         if len(open) >= 2 and n.f <= open[1].f: greater = 1
+                #     if greater == 0 : self.puzzle.slide2(keysym[current.move])
                 
-                
+                # if len(open) == 1 and current.values != goal.values:
+                #     for n in current.path:
+                #         self.puzzle.slide2(keysym[n])
+                #     open.append(current)
+
+                if current != start : prev = current
                 del open[0]
                 open.sort()
         
